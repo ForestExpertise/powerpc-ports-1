@@ -1,6 +1,6 @@
 --- src/subprocess-posix.cc.orig	2022-05-15 10:08:10.000000000 -0500
 +++ src/subprocess-posix.cc	2022-05-18 04:18:56.000000000 -0500
-@@ -22,7 +22,6 @@
+@@ -23,7 +23,6 @@
  #include <stdio.h>
  #include <string.h>
  #include <sys/wait.h>
@@ -8,7 +8,7 @@
  
  #if defined(USE_PPOLL)
  #include <poll.h>
-@@ -30,7 +29,6 @@
+@@ -31,7 +30,6 @@
  #include <sys/select.h>
  #endif
  
@@ -16,9 +16,10 @@
  
  #include "util.h"
  
-@@ -61,74 +59,61 @@
+@@ -71,75 +69,62 @@
  #endif  // !USE_PPOLL
    SetCloseOnExec(fd_);
+ }
  
 -  posix_spawn_file_actions_t action;
 -  int err = posix_spawn_file_actions_init(&action);
