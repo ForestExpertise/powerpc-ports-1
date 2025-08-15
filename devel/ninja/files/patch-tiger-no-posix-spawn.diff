@@ -1,5 +1,5 @@
---- src/subprocess-posix.cc.orig	2022-05-15 10:08:10.000000000 -0500
-+++ src/subprocess-posix.cc	2022-05-18 04:18:56.000000000 -0500
+--- src/subprocess-posix.cc.orig	2025-07-10 22:43:08.000000000 +0200
++++ src/subprocess-posix.cc	2025-08-14 05:57:56.000000000 +200
 @@ -23,7 +23,6 @@
  #include <stdio.h>
  #include <string.h>
@@ -148,8 +148,8 @@
 -     close(subproc_stdout_fd);
 +   close(output_pipe[1]);
    return true;
---- src/subprocess_test.cc.orig	2022-05-15 10:08:10.000000000 -0500
-+++ src/subprocess_test.cc	2022-05-18 04:18:56.000000000 -0500
+--- src/subprocess_test.cc.orig	2025-07-10 22:43:08.000000000 +0200
++++ src/subprocess_test.cc	2025-08-14 05:57:56.000000000 +200
 @@ -226,8 +226,7 @@
    rlimit rlim;
    ASSERT_EQ(0, getrlimit(RLIMIT_NOFILE, &rlim));
