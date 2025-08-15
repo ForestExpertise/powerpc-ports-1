@@ -16,7 +16,7 @@
  
  #include "util.h"
  
-@@ -71,75 +69,62 @@
+@@ -71,78 +69,63 @@
  #endif  // !USE_PPOLL
    SetCloseOnExec(fd_);
  }
@@ -26,9 +26,11 @@
 -  if (err != 0)
 -    Fatal("posix_spawn_file_actions_init: %s", strerror(err));
 -
--  err = posix_spawn_file_actions_addclose(&action, output_pipe[0]);
--  if (err != 0)
--    Fatal("posix_spawn_file_actions_addclose: %s", strerror(err));
+-  if (!use_console_) {
+-    err = posix_spawn_file_actions_addclose(&action, fd_);
+-    if (err != 0)
+-      Fatal("posix_spawn_file_actions_addclose: %s", strerror(err));
+-  }
 -
 -  posix_spawnattr_t attr;
 -  err = posix_spawnattr_init(&attr);
@@ -99,18 +101,17 @@
 +      // In the console case, output_pipe is still inherited by the child and
 +      // closed when the subprocess finishes, which then notifies ninja.
  
--    err = posix_spawn_file_actions_adddup2(&action, output_pipe[1], 1);
+-    err = posix_spawn_file_actions_adddup2(&action, subproc_stdout_fd, 1);
 -    if (err != 0)
 -      Fatal("posix_spawn_file_actions_adddup2: %s", strerror(err));
--    err = posix_spawn_file_actions_adddup2(&action, output_pipe[1], 2);
+-    err = posix_spawn_file_actions_adddup2(&action, subproc_stdout_fd, 2);
 -    if (err != 0)
 -      Fatal("posix_spawn_file_actions_adddup2: %s", strerror(err));
--    err = posix_spawn_file_actions_addclose(&action, output_pipe[1]);
+-    err = posix_spawn_file_actions_addclose(&action, subproc_stdout_fd);
 -    if (err != 0)
 -      Fatal("posix_spawn_file_actions_addclose: %s", strerror(err));
--    // In the console case, output_pipe is still inherited by the child and
--    // closed when the subprocess finishes, which then notifies ninja.
 -  }
+-
 -#ifdef POSIX_SPAWN_USEVFORK
 -  flags |= POSIX_SPAWN_USEVFORK;
 -#endif
@@ -142,8 +143,10 @@
 +     }
 +    _exit(1);
 +    }
- 
-   close(output_pipe[1]);
+
+-   if (!use_console_)
+-     close(subproc_stdout_fd);
++   close(output_pipe[1]);
    return true;
 --- src/subprocess_test.cc.orig	2022-05-15 10:08:10.000000000 -0500
 +++ src/subprocess_test.cc	2022-05-18 04:18:56.000000000 -0500
@@ -152,7 +155,7 @@
    ASSERT_EQ(0, getrlimit(RLIMIT_NOFILE, &rlim));
    if (rlim.rlim_cur < kNumProcs) {
 -    printf("Raise [ulimit -n] above %u (currently %lu) to make this test go\n",
--           kNumProcs, rlim.rlim_cur);
+-           kNumProcs, static_cast<unsigned long>(rlim.rlim_cur));
 +    printf("Raise [ulimit -n] well above %u (currently %lu) to make this test go\n", kNumProcs, rlim.rlim_cur);
      return;
    }
