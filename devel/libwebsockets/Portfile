@@ -8,8 +8,7 @@ PortGroup           legacysupport 1.1
 # LegacySupport is needed for strnlen before 10.7
 legacysupport.newest_darwin_requires_legacy 10
 
-github.setup        warmcat libwebsockets 4.3.3 v
-github.tarball_from archive
+github.setup        warmcat libwebsockets 4.5.2 v
 revision            0
 categories          devel net
 license             LGPL-2.1
@@ -24,14 +23,15 @@ long_description    \
     CPU and memory resources, and provide fast throughput in both directions \
     as client or server.
 
-checksums           rmd160  aed3594d639d46e926a4d445bee2ea44b7726a2c \
-                    sha256  6fd33527b410a37ebc91bb64ca51bdabab12b076bc99d153d7c5dd405e4bdf90 \
-                    size    15618186
+checksums           rmd160  3ea07ef4d441452143d309a1432ed7f798ff5276 \
+                    sha256  04244efb7a6438c8c6bfc79b21214db5950f72c9cf57e980af57ca321aae87b2 \
+                    size    20158648
+github.tarball_from archive
 
-depends_lib-append  path:lib/libssl.dylib:openssl \
-                    port:zlib \
-                    port:libev \
-                    path:lib/pkgconfig/libuv.pc:libuv
+depends_lib-append  port:libev \
+                    path:lib/pkgconfig/libuv.pc:libuv \
+                    path:lib/libssl.dylib:openssl \
+                    port:zlib
 
 # https://trac.macports.org/ticket/65706
 compiler.blacklist-append *gcc-4.*

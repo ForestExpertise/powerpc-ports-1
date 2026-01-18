@@ -5,20 +5,20 @@ PortGroup           active_variants 1.1
 PortGroup           github 1.0
 PortGroup           openssl 1.0
 
-github.setup        rakshasa libtorrent 0.16.0 v
+github.setup        rakshasa libtorrent 0.16.5 v
 revision            0
 conflicts           libtorrent-devel
 categories          net devel
 maintainers         nomaintainer
 license             {GPL-2+ OpenSSLException}
 description         BitTorrent library
-long_description    libTorrent is a BitTorrent library written in C++ for \
-                    *nix. It is designed to avoid redundant copying and \
+long_description    libTorrent is a BitTorrent library written in C++ \
+                    for *nix. It is designed to avoid redundant copying and \
                     storing of data that other clients and libraries suffer from.
 
-checksums           rmd160  c53a74b48679a260821da027225788521fb021a6 \
-                    sha256  ca3b96bc478db2cd282ccb87b91b169662d7c9298dbca9934f8556c2935cab73 \
-                    size    458920
+checksums           rmd160  fa96797ed6180da1d3d95fa9651011c079490d8f \
+                    sha256  fdd94681b92d8a5bc6077bb54d8c6529fe8bfa700af9ec118e0292c8200dbcb3 \
+                    size    462185
 github.tarball_from archive
 
 use_autoreconf      yes
@@ -32,7 +32,8 @@ if {${os.platform} eq "darwin" && ${os.major} <= 10} {
 }
 
 depends_lib-append  port:curl \
-                    port:libsigcxx2
+                    port:libsigcxx2 \
+                    port:zlib
 
 # https://github.com/rakshasa/rtorrent/wiki/Installing#non-blocking-hostname-lookup-in-curl
 require_active_variants curl ares

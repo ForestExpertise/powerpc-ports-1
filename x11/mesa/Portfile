@@ -13,9 +13,6 @@ name                    mesa
 conflicts               gl-headers
 epoch                   1
 
-# Updating to 25.2.x requires reverting this: https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/35374
-# Mirror: https://github.com/bminor/mesa-mesa/commit/6a28d6707ddaa20da70e07566c1cafa5ef51a020
-
 version                 25.1.9
 revision                1
 
@@ -145,9 +142,12 @@ variant llvm description "Enable the llvmpipe driver" {
 # Since angle port is fixed now, and to maintain better compatibility, this is now disabled here as well.
 variant egl description "Build with EGL and GLES" { }
 
-# FIXME: +llvm builds for powerpc, but at least SDL2 with mesa GL gives a weird error then:
+# FIXME: as of v25.1.9, +llvm builds for powerpc, but JIT support is missing, which leads to:
 # LLVM ERROR: Scattered relocations not supported for MachO AArch64 (!)
-# Disabled by default due to https://github.com/macports/macports-ports/commit/7ed77200276ce02c654775a86404a8d78b8f8801
+# See: https://github.com/iains/LLVM-7-branch/issues/10
+# Later versions require reverting this: https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/35374
+# Mirror: https://github.com/bminor/mesa-mesa/commit/6a28d6707ddaa20da70e07566c1cafa5ef51a020
+# Also disabled by default due to https://github.com/macports/macports-ports/commit/7ed77200276ce02c654775a86404a8d78b8f8801
 if {${os.platform} ne "darwin"} {
     default_variants        +llvm
 }
@@ -160,7 +160,7 @@ if {![variant_isset egl]} {
                     -Dgles2=disabled
 
     post-destroot {
-        # avoid conflict with ANGLE
+        # Avoid conflict with ANGLE
         move ${destroot}${prefix}/include/KHR/khrplatform.h \
             ${destroot}${prefix}/include/KHR/khrplatform_mesa.h
         reinplace "s|khrplatform\.h|khrplatform_mesa.h|" \

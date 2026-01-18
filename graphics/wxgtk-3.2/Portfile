@@ -12,7 +12,7 @@ PortGroup           wxWidgets       1.0
 legacysupport.newest_darwin_requires_legacy 10
 
 # remember to bump version of wxWidgets-common
-github.setup        wxWidgets wxWidgets 3.2.8.1 v
+github.setup        wxWidgets wxWidgets 3.2.9 v
 revision            0
 
 set branch          [join [lrange [split ${version} .] 0 1] .]
@@ -36,9 +36,9 @@ homepage            https://www.wxwidgets.org
 distname            wxWidgets-${version}
 use_bzip2           yes
 
-checksums           rmd160  5c2a2cd68e82541a5a7d3dd93211c8f4077ae74f \
-                    sha256  ad0cf6c18815dcf1a6a89ad3c3d21a306cd7b5d99a602f77372ef1d92cb7d756 \
-                    size    27449383
+checksums           rmd160  b04cbb69d7b5a1cf67fcec30b487237808a299a4 \
+                    sha256  fb90f9538bffd6a02edbf80037a0c14c2baf9f509feac8f76ab2a5e4321f112b \
+                    size    27366567
 github.tarball_from releases
 
 dist_subdir         wxWidgets/${version}
@@ -115,8 +115,9 @@ configure.args-append \
                     -DwxUSE_LIBPNG=sys \
                     -DwxUSE_LIBSDL=OFF \
                     -DwxUSE_LIBTIFF=sys \
+                    -DwxUSE_MEDIACTRL=OFF \
                     -DwxUSE_MIMETYPE=ON \
-                    -DwxUSE_OPENGL=ON \
+                    -DwxUSE_OPENGL=OFF \
                     -DwxUSE_POSTSCRIPT=ON \
                     -DwxUSE_PRINTF_POS_PARAMS=ON \
                     -DwxUSE_REGEX=sys \
@@ -125,14 +126,14 @@ configure.args-append \
                     -DwxUSE_SECRETSTORE=ON \
                     -DwxUSE_SOCKETS=ON \
                     -DwxUSE_SPELLCHECK=OFF \
-                    -DwxUSE_STC=OFF \
+                    -DwxUSE_STC=ON \
                     -DwxUSE_STDPATHS=ON \
                     -DwxUSE_THREADS=ON \
                     -DwxUSE_UNICODE=ON \
                     -DwxUSE_UNSAFE_WXSTRING_CONV=ON \
                     -DwxUSE_WEBREQUEST=ON \
-                    -DwxUSE_WEBREQUEST_CURL_DEFAULT=OFF \
-                    -DwxUSE_WEBREQUEST_URLSESSION=ON \
+                    -DwxUSE_WEBREQUEST_CURL_DEFAULT=ON \
+                    -DwxUSE_WEBREQUEST_URLSESSION=OFF \
                     -DwxUSE_WEBVIEW=OFF \
                     -DwxUSE_XLOCALE=ON \
                     -DwxUSE_XRC=ON \
@@ -149,7 +150,6 @@ platform darwin {
                     0004-evtloop_cf-fix.patch \
                     0005-defs.h-fix.patch \
                     0006-cfstring-fix.patch \
-                    0007-toolkit.cmake-fix-options.patch \
                     0008-utilsunx-no-memset_s-before-10.9.patch \
                     0009-utils_base.mm-fix.patch \
                     0010-Install-forgotten-stdpaths.h.patch
@@ -160,22 +160,38 @@ platform darwin {
                     0011-volume.mm-support-building-on-10.7-and-with-gcc.patch \
                     0012-Move-volume.mm-in-place-for-macOS.patch
 
-    # Broken in 3.2.x at the moment:
+    patchfiles-append \
+                    0001-osx-evtloopsrc.h-install-always-on-macOS.patch \
+                    0003-mimetypes-fixes.patch \
+                    0004-Fix-Cocoa-stuff.patch
+
+    # TODO: a hack to support wxPython build:
+    patchfiles-append \
+                    0006-wx-mediactrl.h-a-hack-to-install-it.patch
+
+    # TODO: a hack, may not be needed for 3.3, verify:
+    patchfiles-append \
+                    0007-powercmn.cpp.patch
+
+    # UNSAFE, a hack for 10.5:
+    if {${os.major} < 10} {
+        patchfiles-append \
+                    patch-leopard.diff
+    }
+
+    # Broken in 3.2.x at the moment (fixed in the master):
     # https://github.com/wxWidgets/wxWidgets/issues/25873
     # Might have been fixed in https://github.com/wxWidgets/wxWidgets/pull/25919
-#    if {${os.major} < 13} {
-        configure.args-replace \
-                    -DwxUSE_WEBREQUEST_CURL_DEFAULT=OFF -DwxUSE_WEBREQUEST_CURL_DEFAULT=ON \
-                    -DwxUSE_WEBREQUEST_URLSESSION=ON -DwxUSE_WEBREQUEST_URLSESSION=OFF
+#    if {${os.major} > 12} {
+#        configure.args-replace \
+#                    -DwxUSE_WEBREQUEST_CURL_DEFAULT=ON -DwxUSE_WEBREQUEST_CURL_DEFAULT=OFF \
+#                    -DwxUSE_WEBREQUEST_URLSESSION=OFF -DwxUSE_WEBREQUEST_URLSESSION=ON
 #    }
 
     if {${os.major} < 12} {
         configure.cxxflags-append \
                     -F/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks
     }
-
-    configure.ldflags-append \
-                    -undefined dynamic_lookup
 }
 
 platform darwin powerpc {
@@ -186,7 +202,7 @@ platform darwin powerpc {
 }
 
 post-destroot {
-        foreach dylib [ exec find ${destroot}${wxWidgets.prefix}/lib -name "\*.dylib" ] {
+    foreach dylib [ exec find ${destroot}${wxWidgets.prefix}/lib -name "\*.dylib" ] {
             regsub ":$" ${dylib} "" destroot_dylib_path
             regsub ${destroot} ${destroot_dylib_path} "" dylib_path
             system "install_name_tool -id ${dylib_path} ${destroot_dylib_path}"
@@ -222,10 +238,27 @@ post-destroot {
                 ${destroot}${wxWidgets.prefix}/bin/wxrc-${branch}"
             system "install_name_tool -change ${prefix}/lib/libwx_baseu_xml-${branch}.0.dylib ${wxWidgets.prefix}/lib/libwx_baseu_xml-${branch}.0.dylib \
                 ${destroot}${wxWidgets.prefix}/bin/wxrc-${branch}"
-        }
+    }
 
     set confscript ${wxWidgets.prefix}/lib/wx/config/${wxtype}-unicode-${branch}
     ln -sf ${confscript} ${destroot}${wxWidgets.prefix}/bin/wx-config
+}
+
+variant gstreamer description "Enable GStreamer" {
+    depends_lib-append \
+            port:gstreamer1
+
+    configure.args-replace \
+            -DwxUSE_MEDIACTRL=OFF -DwxUSE_MEDIACTRL=ON
+}
+
+variant opengl description "Enable GL" {
+    configure.args-replace \
+            -DwxUSE_OPENGL=OFF -DwxUSE_OPENGL=ON
+}
+
+if {${os.platform} ne "darwin" || ${os.major} < 20} {
+    default_variants-append +opengl
 }
 
 github.livecheck.regex  {([0-9.]+)}

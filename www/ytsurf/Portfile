@@ -3,19 +3,19 @@
 PortSystem          1.0
 PortGroup           github 1.0
 
-github.setup        Stan-breaks ytsurf 42ee612f60975f1fcb89eb37d98a33063a783bee
-version             20251003
+github.setup        Stan-breaks ytsurf 3.0.8 v
 revision            0
+epoch               1
 categories          www multimedia
 platforms           any
 license             GPL-3
 maintainers         {@barracuda156 macos-powerpc.org:barracuda} openmaintainer
-description         Simple shell script to search YouTube videos from your terminal \
+description         Shell script to search and play YouTube videos
+long_description    Simple shell script to search YouTube videos from your terminal \
                     and play them with mpv
-long_description    {*}${description}
-checksums           rmd160  999f24c6da116126925a6f6d294b1f3a399dc133 \
-                    sha256  7d3ad53d2a7328c3a8e3120603256021352a67a2eb16c8b3b2218b360d4aa34d \
-                    size    24119
+checksums           rmd160  44ff1315a9630f75f2ed4a143fd407ce69a7b70b \
+                    sha256  b235b548c52a57d0ad7701f791c29822916294bf552cb69be8cb8e164644e871 \
+                    size    26256
 github.tarball_from archive
 supported_archs     noarch
 
@@ -26,6 +26,7 @@ depends_run-append  port:bash \
                     path:bin/ffmpeg:ffmpeg \
                     port:jq \
                     path:bin/mpv:mpv \
+                    path:bin/perl:perl5 \
                     port:sentaku \
                     port:yt-dlp
 

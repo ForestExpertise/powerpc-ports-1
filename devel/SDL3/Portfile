@@ -5,8 +5,9 @@ PortGroup       cmake 1.1
 PortGroup       github 1.0
 
 name            SDL3
-github.setup    libsdl-org SDL 3.2.26 release-
+github.setup    libsdl-org SDL 3.2.30 release-
 revision        0
+conflicts       ${name}-devel
 categories      devel multimedia
 license         zlib
 maintainers     {@barracuda156 macos-powerpc.org:barracuda}
@@ -21,9 +22,9 @@ homepage        https://www.libsdl.org
 
 github.tarball_from releases
 distname        ${name}-${version}
-checksums       rmd160  ec450d90ff097bf8965a623cfc41eb621972a75b \
-                sha256  dad488474a51a0b01d547cd2834893d6299328d2e30f479a3564088b5476bae2 \
-                size    15900269
+checksums       rmd160  050409c64e4514bc9cb0a2f7941c9c357cfdde32 \
+                sha256  4c3b09330d866dc52eb65b66259a6684ad387252ca8c57901b3a2b534eb42e3d \
+                size    15908113
 
 patchfiles      0001-Fixes-for-X11-on-macOS.patch \
                 0002-SDL_build_config_macos.h-fix-macro-for-PowerPC.patch \
@@ -148,6 +149,7 @@ variant dbus description "Enable DBus support" {
                 -DSDL_DBUS=OFF -DSDL_DBUS=ON
 }
 
+# TODO: verify if still the issue.
 # OpenGL via Mesa may lead to system freezes.
 # For now, do not enable by default.
 variant opengl description "Enable OpenGL support" {
