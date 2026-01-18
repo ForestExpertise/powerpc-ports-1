@@ -5,10 +5,10 @@ PortGroup               cmake 1.1
 PortGroup               github 1.0
 PortGroup               legacysupport 1.1
 
-github.setup            ggerganov llama.cpp 6890 b
+github.setup            ggerganov llama.cpp 7542 b
 revision                0
 # This line is for displaying commit in CLI only
-set git-commit          b52edd2
+set git-commit          af3be13
 
 categories              llm
 maintainers             {i0ntempest @i0ntempest} openmaintainer
@@ -19,9 +19,9 @@ long_description        The main goal of ${name} is to enable LLM inference \
                         with minimal setup and state-of-the-art performance \
                         on a wide variety of hardware – locally and in the cloud.
 
-checksums               rmd160  787c63328af0f22d95e32cdb1d606b2346acf3e3 \
-                        sha256  db3fe63bca7438ea1200668874afb2ccf30b368aaf3fad341471a22c0869043e \
-                        size    26112791
+checksums               rmd160  b823e41f78b017675ce6813e15a81bb49faf971b \
+                        sha256  5794f521a3b3ea108339ff8d89d7e236b93bb5b2124716e7c897d56efa45c9fa \
+                        size    28603476
 github.tarball_from     archive
 
 # error: 'filesystem' file not found on 10.14
@@ -30,15 +30,20 @@ legacysupport.newest_darwin_requires_legacy \
 legacysupport.use_mp_libcxx \
                         yes
 
+# The port installs a lot of excutables. When running those on libstdc++-based systems,
+# you will see these warnings: llama-cli(33262) malloc: *** error for object 0xa04dc754: pointer being freed was not allocated
+# They seem to be harmless in this case, however if they start breaking something, the fix will be:
+# legacysupport.redirect_bins llama-cli (and/or whichever other binary needed).
+
 depends_build-append    path:bin/git:git \
                         path:bin/pkg-config:pkgconfig
 
 depends_lib-append      port:curl
 
-# cmake relies on git for version info. We need to set them manually.
+# CMake relies on git for version info. We need to set them manually.
 post-patch {
-    reinplace "s|@BUILD_NUMBER@|${version}|" ${worksrcpath}/common/build-info.cpp.in
-    reinplace "s|@BUILD_COMMIT@|${git-commit}|" ${worksrcpath}/common/build-info.cpp.in
+    reinplace "s|@LLAMA_BUILD_NUMBER@|${version}|" ${worksrcpath}/common/build-info.cpp.in
+    reinplace "s|@LLAMA_BUILD_COMMIT@|${git-commit}|" ${worksrcpath}/common/build-info.cpp.in
 }
 
 compiler.cxx_standard   2017

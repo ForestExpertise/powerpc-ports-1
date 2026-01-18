@@ -10,8 +10,8 @@ legacysupport.use_mp_libcxx yes
 
 # MacPorts upstream switched to vulkan-specific branch,
 # we do not want that. OpenGL branch is actively supported by upstream.
-github.setup        KhronosGroup glslang 16.0.0
-revision            0
+github.setup        KhronosGroup glslang 16.1.0
+revision            1
 
 categories          graphics devel
 license             {BSD Permissive}
@@ -22,9 +22,9 @@ long_description    Glslang is the official reference compiler \
                     for the OpenGL and OpenGL ES shading languages.
 homepage            https://www.khronos.org/opengles/sdk/tools/Reference-Compiler/
 
-checksums           sha256  172385478520335147d3b03a1587424af0935398184095f24beab128a254ecc7 \
-                    rmd160  e1b50839cc339ea6393d6b3af9b6479949d27f0b \
-                    size    4190536
+checksums           sha256  32c605822ed63a0cdc2d24f318c3d912fa14e58573aff1d8eac0cf69f1a6b6d2 \
+                    rmd160  8eb0abcf5165fcfd498e1ce2a09af281b48a26b3 \
+                    size    4244796
 github.tarball_from archive
 
 set py_ver          3.13
@@ -41,12 +41,19 @@ compiler.cxx_standard   2017
 # https://github.com/KhronosGroup/glslang/pull/3371
 patchfiles-append       create-pkgconfig-file.diff
 
-depends_build-append    port:python${py_ver_nodot}
+# Fix finding and linking SPIRV
+patchfiles-append       patch-fix-SPIRV.diff
+
+depends_build-append    path:bin/pkg-config:pkgconfig \
+                        port:python${py_ver_nodot}
+
+depends_lib-append      port:spirv-tools
 
 configure.python        ${prefix}/bin/python${py_ver}
 
-# FIXME: optimizations require SPIRV-Tools, which is currently broken.
-configure.args-append   -DBUILD_SHARED_LIBS=ON \
-                        -DENABLE_GLSLANG_INSTALL=ON \
-                        -DENABLE_OPT=OFF \
+configure.args-append   -DBUILD_EXTERNAL=OFF \
+                        -DBUILD_SHARED_LIBS=ON \
+                        -DGLSLANG_ENABLE_INSTALL=ON \
+                        -DENABLE_HLSL=ON \
+                        -DENABLE_OPT=ON \
                         -DPYTHON_EXECUTABLE:FILEPATH=${configure.python}

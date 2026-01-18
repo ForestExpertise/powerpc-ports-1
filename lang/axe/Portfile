@@ -1,0 +1,91 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:filetype=tcl:et:sw=4:ts=4:sts=4
+
+PortSystem                  1.0
+PortGroup                   github 1.0
+
+github.setup                axelang axe 0.0.15 v
+revision                    0
+categories                  lang
+maintainers                 {@barracuda156 macos-powerpc.org:barracuda} openmaintainer
+license                     GPL-3
+
+description                 Axe programming language
+long_description            {*}${description}. This port is experimental.
+homepage                    https://axelang.org
+
+set boot_hash               5754424c57d72a801cbe314eca857935bf1a003b
+master_sites                https://github.com/axelang/${name}/archive/v${version}/:main \
+                            https://github.com/axelang/${name}-bootstrap/archive/${boot_hash}/:boot
+distfiles                   v${version}${extract.suffix}:main \
+                            axe-bootstrap-${boot_hash}${extract.suffix}:boot
+checksums                   v${version}${extract.suffix} \
+                            rmd160  25703693fe4733dd58122b2ea6673a3cf55fc547 \
+                            sha256  2509a10d547cc019558b0162e2ad00a4bb6e01cd398145dae2ccbc1437732940 \
+                            size    8113584 \
+                            ${name}-bootstrap-${boot_hash}${extract.suffix} \
+                            rmd160  0977f31b0ca2a39f03635086b67c32a07c12241c \
+                            sha256  8a4829cd53703514c24d79fb8d0e8688237c08eaca60fd38d42feee3b1b5e196 \
+                            size    119362
+
+# TODO: perhaps rather patch axc.c and builds.axe to point to correct libs directly. 
+# https://github.com/axelang/axe/issues/5
+post-extract {
+    move ${workpath}/${name}-${version} ${workpath}/${name}
+    move ${workpath}/axe-bootstrap-${boot_hash} ${workpath}/axe-bootstrap
+
+    delete -force ${workpath}/axe/source/compiler/external/lib-macos
+    ln -s ${prefix}/lib ${workpath}/axe/source/compiler/external/lib-macos
+}
+
+depends_lib-append          port:curl \
+                            port:pcre \
+                            port:yyjson \
+                            port:zlib
+
+patch.dir                   ${workpath}
+
+# https://github.com/axelang/axe/issues/4
+post-patch {
+    reinplace "s|\"cc\"|\"${configure.cc}\"|g" \
+                            ${workpath}/${name}/source/compiler/builds.axe \
+                            ${workpath}/${name}-bootstrap/axc.c
+    reinplace "s|-Wno-everything|-Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=implicit-int -Wno-error=return-mismatch|g" \
+                            ${workpath}/${name}/source/compiler/builds.axe \
+                            ${workpath}/${name}-bootstrap/axc.c
+}
+
+# At least for type redefinitions:
+compiler.c_standard         2011
+
+universal_variant           no
+
+use_configure               no
+
+pre-build {
+    # https://github.com/axelang/axe-bootstrap/issues/1
+    configure.cflags-append -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=implicit-int
+
+    system -W ${workpath}/axe-bootstrap "${configure.cc} axc.c -o axe ${configure.cflags}"
+
+    # https://github.com/axelang/axe/commit/6dc6fac82f79730dc0ceaa48b76887f6ffb778bc
+    copy ${workpath}/${name}/source/compiler/std ${workpath}/axe-bootstrap/std
+}
+
+build {
+    # FIXME: 32-bit builds are broken: https://github.com/axelang/axe/issues/9
+    # As a temporary hack, we just use the bootstrap compiler.
+    if {${configure.build_arch} in [list i386 ppc]} {
+        incr revision
+
+        copy ${workpath}/axe-bootstrap/axe ${workpath}/${name}/source/compiler/
+    } else {
+        system -W ${workpath}/${name}/source/compiler "${workpath}/axe-bootstrap/axe axc -o axe -I${prefix}/include -L${prefix}/lib --loud --release"
+    }
+}
+
+destroot {
+    set axe_root ${prefix}/libexec/${name}
+    xinstall -d ${destroot}${axe_root}
+    copy ${workpath}/${name}/source/compiler/axe ${destroot}${axe_root}/
+    copy ${workpath}/${name}/source/compiler/std ${destroot}${axe_root}/
+}

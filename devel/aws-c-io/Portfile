@@ -5,16 +5,18 @@ PortGroup           cmake 1.1
 PortGroup           github 1.0
 PortGroup           openssl 1.0
 
-github.setup        awslabs aws-c-io 0.23.3 v
+# TODO: see if something is done on https://github.com/awslabs/aws-c-io/issues/784
+
+github.setup        awslabs aws-c-io 0.26.0 v
 revision            0
 categories          devel
 license             Apache-2
 maintainers         nomaintainer
 description         Event driven framework for implementing application protocols
 long_description    {*}${description}
-checksums           rmd160  eada9fb03423439327094a659fef24c43e374851 \
-                    sha256  cdcb31b694fc28ba96237ee33a742679daf2dcabfd41464f8a68fbd913907085 \
-                    size    754282
+checksums           rmd160  5cf3ec550b27451eaf2107a33b194f69c307c846 \
+                    sha256  27591a4d67b7401dc0b87f8fec91b1c93764decb32229086113c80d4d6d6d3c0 \
+                    size    754915
 github.tarball_from archive
 
 patchfiles-append   patch-aws-c-io-config.cmake \
@@ -31,6 +33,19 @@ compiler.blacklist-append \
                     *gcc-4.* {clang < 421}
 
 configure.args-append \
+                    -DAWS_USE_SECITEM=OFF \
                     -DBUILD_SHARED_LIBS=ON \
-                    -DBUILD_TESTING=OFF \
+                    -DBUILD_TESTING=ON \
                     -DUSE_S2N=ON
+
+# Needed for tests:
+configure.pre_args-replace \
+                    -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON \
+                    -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF
+
+# FIXME: a number of tests fail, mostly tls-related (not all of those though).
+# On powerpc: 76% tests passed, 47 tests failed out of 192 (with 2 cleanup_in_* disabled due to getting stuck).
+# TLS tests failures are not exclusive to powerpc, but related to Unix-like building:
+# https://github.com/awslabs/aws-c-io/issues/784
+# This must be addressed.
+test.run            yes

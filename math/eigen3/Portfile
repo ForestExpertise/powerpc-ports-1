@@ -22,16 +22,16 @@ if {${subport} eq ${name}} {
     gitlab.livecheck.branch 3.4
     conflicts           eigen5
 
-    checksums           rmd160  7926229417bd172fad1aa1ee63718243e554fcf5 \
-                        sha256  d301b3c05f34e5cddc338e978ef4c58c8b76287c30fb514a235a76bb102d5a43 \
-                        size    2156990
+    checksums           rmd160  d9e19bc11df8b106f0e93271785474d335df8052 \
+                        sha256  8bb7280b7551bf06418d11a9671fdf998cb927830cf21589b394382d26779821 \
+                        size    2157363
 
     compiler.cxx_standard \
                         2011
 }
 
 subport eigen5 {
-    gitlab.setup        libeigen eigen 5.0.0
+    gitlab.setup        libeigen eigen 5.0.1
     revision            0
     gitlab.livecheck.branch 5.0
     # As of 5.0.0 release, it still uses eigen3 paths etc.
@@ -39,9 +39,9 @@ subport eigen5 {
 
     long_description    {*}${description}. This subport tracks the latest branch.
 
-    checksums           rmd160  529743238a60a301a963e00eb7a378469d56fa3d \
-                        sha256  4b9875419e27f3bab28f28e8e07e0c1eaeb2852653c5d275738e8cdd476ffe73 \
-                        size    2325358
+    checksums           rmd160  c20b8890dd0b4cdd20083fc85e8538c8402a4216 \
+                        sha256  e4de6b08f33fd8b8985d2f204381408c660bffa6170ac65b68ae1bd3cd575c0a \
+                        size    2335713
 
     # Eigen's source code specifically checks the version of Apple Clang.
     compiler.blacklist-append \

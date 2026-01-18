@@ -4,7 +4,7 @@ PortSystem          1.0
 PortGroup           python 1.0
 
 name                mastui
-version             1.2.0
+version             1.6.0
 revision            0
 categories-prepend  www
 platforms           any
@@ -13,9 +13,9 @@ maintainers         nomaintainer
 description         Mastodon TUI client
 long_description    {*}${description} built with Python.
 homepage            https://github.com/kimusan/mastui
-checksums           rmd160  ee16c3b625f123815f4f8e9216f5b74e60b885e4 \
-                    sha256  f41efecd5467144f0dfec90054da769245eb7d78fd2e23a8a339edbf6ed0e426 \
-                    size    51415
+checksums           rmd160  b3a4e2765b3a4f122cbdbfbf5c01644fdb819016 \
+                    sha256  04144c0d904573e6e614f518dd62bdde1a309f0e431d208a8ab3db0711db8bfd \
+                    size    65565
 supported_archs     noarch
 
 python.default_version  312
