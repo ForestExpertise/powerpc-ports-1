@@ -75,6 +75,9 @@ platform darwin {
         # needed for the tests to compile correctly on Leopard
         configure.cppflags-append -D__DARWIN_64_BIT_INO_T
     }
+    if {${os.major} == 8} {
+        configure.cppflags-append -D__DARWIN_UNIX03
+    }
 }
 
 test.run        yes
